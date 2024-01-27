@@ -3,24 +3,25 @@ import chaticon from "./assets/chaticon.png";
 import axios from "axios";
 import { UserContext } from "./userContext";
 
-const Register = () => {
+const RegisterAndLoginForm = () => {
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoginOrRegister, setIsLoginOrRegister] = useState('register');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoginOrRegister, setIsLoginOrRegister] = useState('login');
   const {setUsername: setLoggedInUsername, setId} = useContext(UserContext);
   
 
-  async function register(ev){
+  async function handleSumbit(ev){
     ev.preventDefault();
-    const {data} = await axios.post('/register', {username, password});
+    const url = isLoginOrRegister === 'register' ? 'register' : 'login';
+    const {data} = await axios.post(url, {username, password});
     setLoggedInUsername(username);
     setId(data.id);
   }
 
   return (
     <div className="bg-gray-900 h-screen flex items-center">
-      <form className="w-64 mx-auto mb-12" onSubmit={register}>
+      <form className="w-64 mx-auto mb-12" onSubmit={handleSumbit}>
         <img src={chaticon} alt="" className="rounded-full w-25 h-25" />
         <input
           value={username}
@@ -43,13 +44,14 @@ const Register = () => {
           {isLoginOrRegister === 'register' && (
          <div>
          Already a member?  
-          <button onClick={() => setIsLoginOrRegister('login')}>Login here</button>
+          <button className="ml-1" onClick={() => setIsLoginOrRegister('login')}>Login here</button>
          </div>
          )}
+         {/* login */}
          {isLoginOrRegister === 'login' && (
          <div>
-         Already a member?  
-          <button onClick={() => setIsLoginOrRegister('register')}>Register</button>
+         Dont have an account?  
+          <button className="ml-1" onClick={() => setIsLoginOrRegister('register')}>Register</button>
          </div>
          )}
          
@@ -59,4 +61,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default RegisterAndLoginForm;
