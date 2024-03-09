@@ -114,6 +114,7 @@ wss.on("connection", (connection, req) => {
   // console.log(req.headers);
   const cookies = req.headers.cookie;
 
+  //read username and id from the cookies for this connection
   if (cookies) {
     const tokenCookieString = cookies
       .split(";")
@@ -139,6 +140,18 @@ wss.on("connection", (connection, req) => {
   }
   // console.log([...wss.clients].map((c) => c.username));
 
+  connection.on("message", (message) => {
+    const messageData = JSON.parse(message.toString());
+    // console.log(message);
+    const { recipient, text } = messageData;
+    if (recipient && text) {
+      [...wss.clients]
+        .filter((c) => c.userId === recipient)
+        .forEach((c) => c.send(JSON.stringify({ text })));
+    }
+  });
+
+  //notify everyone about online people(when someon e connects)
   [...wss.clients].forEach((client) => {
     client.send(
       JSON.stringify({

@@ -4,10 +4,11 @@ import Logo from "./Logo";
 import { UserContext } from "./userContext";
 
 const Chat = () => {
-  const [, setWs] = useState(null);
+  const [ws, setWs] = useState(null);
   const [onlinePeople, setOnlinePeople] = useState({});
   const [selectedUserId, setSelectedUserId] = useState(null);
   const { username, id } = useContext(UserContext);
+  const [newMessageText, setNewMessageText] = useState("");
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:4044");
@@ -34,7 +35,22 @@ const Chat = () => {
 
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
+    } else {
+      console.log(messageData);
     }
+  }
+
+  function sendMessage(ev) {
+    ev.preventDefault();
+    ws.send(
+      JSON.stringify({
+        message: {
+          recipient: selectedUserId,
+          text: newMessageText,
+        },
+      })
+    );
+    setNewMessageText("");
   }
 
   const onlinePeopleExclOurUser = { ...onlinePeople };
@@ -78,30 +94,38 @@ const Chat = () => {
           )}
         </div>
 
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Type your message here"
-            className="bg-white flex-grow boarder
+        {/* !! <-convert to boolean value  */}
+        {!!selectedUserId && (
+          <form className="flex gap-2" onSubmit={sendMessage}>
+            <input
+              type="text"
+              value={newMessageText}
+              onChange={(ev) => setNewMessageText(ev.target.value)}
+              placeholder="Type your message here"
+              className="bg-white flex-grow boarder
             p-2 "
-          />
-          <button className="bg-green-600 p-2 text-white rounded-sm">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
+            />
+            <button
+              type="submit"
+              className="bg-green-600 p-2 text-white rounded-sm"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-              />
-            </svg>
-          </button>
-        </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+                />
+              </svg>
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );
